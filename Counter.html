@@ -50,10 +50,6 @@
       device: device,      // "ios", "android"
       source: "web_qr"
     });
- // if (device != "web"){
-  const deviceEventName = `qr_scan_redirect_${device}`;
-  analytics.logEvent(deviceEventName, { source: "web_qr", });
- // }
   const REDIRECT_DELAY_MS = 600;   // safer than 300ms
   setTimeout(() => {
       if (device === "android") {
@@ -70,9 +66,8 @@
 
 trackAndRedirect();
 </script>
- 
-  </body>
-
+</body>
 </html>
+
 
 
