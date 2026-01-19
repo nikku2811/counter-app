@@ -57,9 +57,11 @@
   const REDIRECT_DELAY_MS = 600;   // safer than 300ms
   setTimeout(() => {
       if (device === "android") {
+      analytics.logEvent(qr_scan_redirect_android, { source: "web_qr", });
       window.location.replace(ANDROID_STORE);
     } else {
-      window.location.replace(IOS_STORE);
+       analytics.logEvent(qr_scan_redirect_ios, { source: "web_qr", });
+       window.location.replace(IOS_STORE);
     	} 
      }, REDIRECT_DELAY_MS);
   }
@@ -72,4 +74,5 @@ trackAndRedirect();
   </body>
 
 </html>
+
 
