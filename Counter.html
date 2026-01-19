@@ -49,10 +49,7 @@
       device: device,      // "ios", "android"
       source: "web_qr"
     });
-  
-  
- 
-  const REDIRECT_DELAY_MS = 600;   // safer than 300ms
+   const REDIRECT_DELAY_MS = 600;   // safer than 300ms
   setTimeout(() => {
       if (device === "ios") {
      analytics.logEvent(qr_scan_redirect_ios, { source: "web_qr", });
@@ -71,6 +68,7 @@ trackAndRedirect();
  
   </body>
 </html>
+
 
 
 
