@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>QR Redirect</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- Firebase SDKs (Compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
+ 
+</head>
+ 
+<script>
+  // ---------------------------------------------------------
+  // 🔥 Firebase Configuration
+  // ---------------------------------------------------------
+  const firebaseConfig = {
+  apiKey: "AIzaSyDTMuGg0sjEZD5dhD9wj3OZPbuSDZ7tEwA",
+  authDomain: "counterapp-dc45b.firebaseapp.com",
+  projectId: "counterapp-dc45b",
+  storageBucket: "counterapp-dc45b.appspot.com",
+  messagingSenderId: "963167954662",
+  appId: "1:963167954662:web:26883d6a1d85d54ed4fd27",
+  measurementId: "G-2YE7FLMZ5P"
+};
+  firebase.initializeApp(firebaseConfig);
+  const analytics = firebase.analytics();
+  // ---------------------------------------------------------
+  // 📱 Store URLs
+  // ---------------------------------------------------------
+  const ANDROID_STORE = "https://play.google.com/store/apps/details?id=in.gov.diksha.app&hl=en_IN";
+  const IOS_STORE     = "https://apps.apple.com/in/app/diksha/id1587874277";
+  const FALLBACK_URL  = "https://diksha.gov.in";
+  // ---------------------------------------------------------
+  // 🧠 Device Detection
+  // ---------------------------------------------------------
+  function detectDevice() {
+    const ua = navigator.userAgent || "";
+    if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
+    if (/Android/i.test(ua)) return "android";
+     return "web";
+  }
+  // ---------------------------------------------------------
+  // 📊 Track + Redirect (with small delay to flush events)
+  // ---------------------------------------------------------
+  function trackAndRedirect() {
+    const device = detectDevice();
+    // General event
+    analytics.logEvent("qr_scan_redirect", {
+      device: device,      // "ios", "android"
+      source: 'local_html'
+    });
+  if (device != "web"){
+  const deviceEventName = `qr_scan_redirect_${device}`;
+  analytics.logEvent(deviceEventName, { source: 'local_html', });
+  }
+  const REDIRECT_DELAY_MS = 600;   // safer than 300ms
+  setTimeout(() => {
+      if (device === "android") {
+      window.location.replace(ANDROID_STORE);
+    } else if (device === "ios") {
+      window.location.replace(IOS_STORE);
+    	} 
+     }, REDIRECT_DELAY_MS);
+  }
+  	
+  // Trigger on page load
+
+trackAndRedirect();
+</script>
+ 
+  </body>
+</html>
