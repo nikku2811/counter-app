@@ -1,82 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>QR Redirect</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<!-- Firebase SDKs (Compat) -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
- 
+  <meta charset="UTF-8" />
+  <title>QR Redirect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
 </head>
- <body>
+<body>
 <script>
   // ---------------------------------------------------------
   // 🔥 Firebase Configuration
   // ---------------------------------------------------------
   const firebaseConfig = {
-  apiKey: "AIzaSyDTMuGg0sjEZD5dhD9wj3OZPbuSDZ7tEwA",
-  authDomain: "counterapp-dc45b.firebaseapp.com",
-  projectId: "counterapp-dc45b",
-  storageBucket: "counterapp-dc45b.appspot.com",
-  messagingSenderId: "963167954662",
-  appId: "1:963167954662:web:26883d6a1d85d54ed4fd27",
-  measurementId: "G-2YE7FLMZ5P"
-};
+    apiKey: "AIzaSyAJvGAw0xD4OP6lUZ4eiIrGpEz0MsIeTMI",
+    authDomain: "diksha-4446b.firebaseapp.com",
+    databaseURL: "https://diksha-4446b.firebaseio.com",
+    projectId: "diksha-4446b",
+    storageBucket: "diksha-4446b.appspot.com", // ✅ Correct bucket
+    messagingSenderId: "280944945973",
+    appId: "1:280944945973:web:07d5368f6da7f0efb5fa7c",
+    measurementId: "G-9VX57LPW7R"
+  };
+
   firebase.initializeApp(firebaseConfig);
   const analytics = firebase.analytics();
+
   // ---------------------------------------------------------
   // 📱 Store URLs
   // ---------------------------------------------------------
-  const ANDROID_STORE = "https://play.google.com/store/apps/details?id=in.gov.diksha.app&hl=en_IN";
-  const IOS_STORE     = "https://apps.apple.com/in/app/diksha/id1587874277";
-  const FALLBACK_URL  = "https://diksha.gov.in";
+  const STORE_URLS = {
+    ios: "https://apps.apple.com/in/app/diksha/id1587874277",
+    android: "https://play.google.com/store/apps/details?id=in.gov.diksha.app&hl=en_IN",
+    web: "https://diksha.gov.in"
+  };
+
   // ---------------------------------------------------------
   // 🧠 Device Detection
   // ---------------------------------------------------------
   function detectDevice() {
     const ua = navigator.userAgent || "";
     if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
-    //if (/Android/i.test(ua)) return "android";
-     return "android";
+    if (/Android/i.test(ua)) return "android";
+    return "web";
   }
+
   // ---------------------------------------------------------
-  // 📊 Track + Redirect (with small delay to flush events)
+  // 📊 Track + Redirect
   // ---------------------------------------------------------
   function trackAndRedirect() {
     const device = detectDevice();
+
     // General event
     analytics.logEvent("qr_scan_redirect", {
-      device: device,      // "ios", "android"
-      source: "website_qr"
+      device: device,
+      source: "website_qr",
+      ts: Date.now()
     });
-  
-  const deviceEventName = `qr_scan_redirect_${device}`;
-  analytics.logEvent(deviceEventName, { source: "website_qr", });
- 
-  const REDIRECT_DELAY_MS = 1000;   // safer than 300ms
-  setTimeout(() => {
-      if (device === "android") {
-      window.location.replace(ANDROID_STORE);
-    } else if (device === "ios") {
-      window.location.replace(IOS_STORE);
-    	} 
-    else{ 
-       window.location.replace(FALLBACK_URL); 
-      }
-     }, REDIRECT_DELAY_MS);
+
+    // Device-specific event
+    analytics.logEvent(`qr_scan_redirect_${device}`, {
+      source: "website_qr",
+      ts: Date.now()
+    });
+
+    // Redirect after short delay
+    const REDIRECT_DELAY_MS = 1000;
+    setTimeout(() => {
+      window.location.replace(STORE_URLS[device]);
+    }, REDIRECT_DELAY_MS);
   }
-    // Trigger on page load
 
-document.addEventListener("DOMContentLoaded", () => {
-trackAndRedirect();
-});
+  // ---------------------------------------------------------
+  // 🎯 Listener: Trigger on DOM ready
+  // ---------------------------------------------------------
+  document.addEventListener("DOMContentLoaded", trackAndRedirect);
 </script>
- 
-  </body>
+</body>
 </html>
-
-
 
 
 
