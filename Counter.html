@@ -37,7 +37,7 @@
   function detectDevice() {
     const ua = navigator.userAgent || "";
     if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
-    if (/Android/i.test(ua)) return "android";
+    return "android";
      }
   // ---------------------------------------------------------
   // 📊 Track + Redirect (with small delay to flush events)
@@ -55,11 +55,11 @@
  
   const REDIRECT_DELAY_MS = 600;   // safer than 300ms
   setTimeout(() => {
-      if (device === "android") {
-      window.location.replace(ANDROID_STORE);
-    } else if (device === "ios") {
-      window.location.replace(IOS_STORE);
-    	} 
+      if (device === "ios") {
+     window.location.replace(IOS_STORE);
+    } else  {
+        window.location.replace(ANDROID_STORE);
+      	} 
      }, REDIRECT_DELAY_MS);
   }
   	
@@ -70,5 +70,6 @@ trackAndRedirect();
  
   </body>
 </html>
+
 
 
