@@ -48,16 +48,18 @@
     // General event
     analytics.logEvent("qr_scan_redirect", {
       device: device,      // "ios", "android"
-      source: "web_qr"
+      source: 'local_html'
     });
+  
+  const deviceEventName = `qr_scan_redirect_${device}`;
+  analytics.logEvent(deviceEventName, { source: 'local_html', });
+ 
   const REDIRECT_DELAY_MS = 600;   // safer than 300ms
   setTimeout(() => {
       if (device === "android") {
-      analytics.logEvent(qr_scan_redirect_android, { source: "web_qr", });
       window.location.replace(ANDROID_STORE);
-    } else {
-       analytics.logEvent(qr_scan_redirect_ios, { source: "web_qr", });
-       window.location.replace(IOS_STORE);
+    } else if (device === "ios") {
+      window.location.replace(IOS_STORE);
     	} 
      }, REDIRECT_DELAY_MS);
   }
@@ -66,9 +68,6 @@
 
 trackAndRedirect();
 </script>
-</body>
+ 
+  </body>
 </html>
-
-
-
-
