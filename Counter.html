@@ -37,8 +37,9 @@
   function detectDevice() {
     const ua = navigator.userAgent || "";
     if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
-    return "android";
-     }
+    if (/Android/i.test(ua)) return "android";
+     return "android";
+  }
   // ---------------------------------------------------------
   // 📊 Track + Redirect (with small delay to flush events)
   // ---------------------------------------------------------
@@ -49,27 +50,26 @@
       device: device,      // "ios", "android"
       source: "web_qr"
     });
-   const REDIRECT_DELAY_MS = 600;   // safer than 300ms
+  
+  const deviceEventName = `qr_scan_redirect_${device}`;
+  analytics.logEvent(deviceEventName, { source: "web_qr", });
+ 
+  const REDIRECT_DELAY_MS = 600;   // safer than 300ms
   setTimeout(() => {
-      if (device === "ios") {
-     analytics.logEvent(qr_scan_redirect_ios, { source: "web_qr", });
-     window.location.replace(IOS_STORE)
-    } else  {
-       analytics.logEvent(qr_scan_redirect_android, { source: "web_qr", });
-       window.location.replace(ANDROID_STORE);
-      	} 
+      if (device === "android") {
+      window.location.replace(ANDROID_STORE);
+    } else if (device === "ios") {
+      window.location.replace(IOS_STORE);
+    	} 
+    else{ 
+       window.location.replace(ANDROID_STORE); 
+      }
      }, REDIRECT_DELAY_MS);
   }
-  	
-  // Trigger on page load
+    // Trigger on page load
 
 trackAndRedirect();
 </script>
  
   </body>
 </html>
-
-
-
-
-
