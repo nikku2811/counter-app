@@ -47,11 +47,11 @@
     // General event
     analytics.logEvent("qr_scan_redirect", {
       device: device,      // "ios", "android"
-      source: 'local_html'
+      source: "web_qr"
     });
   
   const deviceEventName = `qr_scan_redirect_${device}`;
-  analytics.logEvent(deviceEventName, { source: 'local_html', });
+  analytics.logEvent(deviceEventName, { source: "web_qr", });
  
   const REDIRECT_DELAY_MS = 600;   // safer than 300ms
   setTimeout(() => {
@@ -70,4 +70,5 @@ trackAndRedirect();
  
   </body>
 </html>
+
 
