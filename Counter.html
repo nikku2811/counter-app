@@ -2,31 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>QR Redirect</title>
+  <title>DIKSHA QR Redirect</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
 </head>
 <body>
 <script>
   // ---------------------------------------------------------
-  // 🔥 Firebase Configuration
+  // 🔧 Measurement Protocol config (Firebase GA4)
   // ---------------------------------------------------------
-  const firebaseConfig = {
-    apiKey: "AIzaSyAJvGAw0xD4OP6lUZ4eiIrGpEz0MsIeTMI",
-    authDomain: "diksha-4446b.firebaseapp.com",
-    databaseURL: "https://diksha-4446b.firebaseio.com",
-    projectId: "diksha-4446b",
-    storageBucket: "diksha-4446b.appspot.com", // ✅ Correct bucket
-    messagingSenderId: "280944945973",
-    appId: "1:280944945973:web:07d5368f6da7f0efb5fa7c",
-    measurementId: "G-9VX57LPW7R"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const analytics = firebase.analytics();
+  const MEASUREMENT_ID = "G-2YE7FLMZ5P";        // your GA4 measurement ID
+  const API_SECRET     = "Sh5hsJXKQEKydOmG9V0BbQ";     // create in Firebase → Data streams
+  const CLIENT_ID_KEY  = "qr_redirect_client_id";
 
   // ---------------------------------------------------------
   // 📱 Store URLs
@@ -38,49 +24,105 @@
   };
 
   // ---------------------------------------------------------
-  // 🧠 Device Detection
+  // 🧠 Device detection
   // ---------------------------------------------------------
   function detectDevice() {
     const ua = navigator.userAgent || "";
     if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
-   // if (/Android/i.test(ua)) return "android";
-    return "android";
+    if (/Android/i.test(ua)) return "android";
+    return "web";
   }
 
   // ---------------------------------------------------------
-  // 📊 Track + Redirect
+  // 🆔 Client ID (persisted) for GA4 MP
   // ---------------------------------------------------------
-  function trackAndRedirect() {
+  function getClientId() {
+    let cid = localStorage.getItem(CLIENT_ID_KEY);
+    if (!cid) {
+      cid = `${Date.now()}.${Math.floor(Math.random() * 1e9)}`;
+      localStorage.setItem(CLIENT_ID_KEY, cid);
+    }
+    return cid;
+  }
+
+  // ---------------------------------------------------------
+  // 📊 Build GA4 Measurement Protocol payload
+  // ---------------------------------------------------------
+  function buildPayload(device) {
+    const client_id = getClientId();
+    const ts = Date.now();
+
+    return {
+      client_id,
+      events: [
+        {
+          name: "qr_scan_redirect",
+          params: {
+            device,
+            source: "website_qr",
+            ts
+          }
+        },
+        {
+          name: `qr_scan_redirect_${device}`,
+          params: {
+            source: "website_qr",
+            ts
+          }
+        }
+      ]
+    };
+  }
+
+  // ---------------------------------------------------------
+  // 🚀 Send event reliably (sendBeacon → fetch keepalive fallback)
+  // ---------------------------------------------------------
+  function sendEvents(payload) {
+    const url = `https://www.google-analytics.com/mp/collect?measurement_id=${encodeURIComponent(MEASUREMENT_ID)}&api_secret=${encodeURIComponent(API_SECRET)}`;
+    const body = JSON.stringify(payload);
+
+    // Prefer beacon for unload-safe delivery
+    if (navigator.sendBeacon) {
+      const ok = navigator.sendBeacon(url, body);
+      if (ok) return Promise.resolve(true);
+      // fall through to fetch if beacon fails
+    }
+
+    // Fallback: fetch with keepalive to survive navigation
+    return fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      keepalive: true
+    }).then(() => true).catch(() => false);
+  }
+
+  // ---------------------------------------------------------
+  // 🔁 Track + redirect
+  // ---------------------------------------------------------
+  async function trackAndRedirect() {
     const device = detectDevice();
+    const payload = buildPayload(device);
 
-    // General event
-    analytics.logEvent("qr_scan_redirect", {
-      device: device,
-      source: "website_qr",
-      ts: Date.now()
-    });
+    // Fire events; don’t block redirect forever
+    try {
+      await sendEvents(payload);
+    } catch (_) {
+      // swallow errors—redirect should still proceed
+    }
 
-    // Device-specific event
-    analytics.logEvent(`qr_scan_redirect_${device}`, {
-      source: "website_qr",
-      ts: Date.now()
-    });
-
-    // Redirect after short delay
-    const REDIRECT_DELAY_MS = 1000;
+    // Short delay (optional) to keep UX smooth
+    const REDIRECT_DELAY_MS = 600;
     setTimeout(() => {
-      window.location.replace(STORE_URLS[device]);
+      const target = STORE_URLS[device] || STORE_URLS.web;
+      window.location.replace(target);
     }, REDIRECT_DELAY_MS);
   }
 
   // ---------------------------------------------------------
-  // 🎯 Listener: Trigger on DOM ready
+  // 🎯 Start on DOM ready
   // ---------------------------------------------------------
   document.addEventListener("DOMContentLoaded", trackAndRedirect);
 </script>
 </body>
 </html>
-
-
-
-
