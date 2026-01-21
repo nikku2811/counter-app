@@ -60,14 +60,16 @@
           params: {
             device,
             source: "website_qr",
-            ts
+            ts,
+            event_count:1
           }
         },
         {
           name: `qr_scan_redirect_${device}`,
           params: {
             source: "website_qr",
-            ts
+            ts,
+            event_count:1
           }
         }
       ]
@@ -126,4 +128,5 @@
 </script>
 </body>
 </html>
+
 
