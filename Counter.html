@@ -10,9 +10,9 @@
   // ---------------------------------------------------------
   // 🔧 Measurement Protocol config (Firebase GA4)
   // ---------------------------------------------------------
-  const MEASUREMENT_ID = "G-2YE7FLMZ5P";        // your GA4 measurement ID
-  const API_SECRET     = "Sh5hsJXKQEKydOmG9V0BbQ";     // create in Firebase → Data streams
-  const CLIENT_ID_KEY  = "qr_redirect_client_id";
+//  const MEASUREMENT_ID = "G-2YE7FLMZ5P";        // your GA4 measurement ID
+ // const API_SECRET     = "Sh5hsJXKQEKydOmG9V0BbQ";     // create in Firebase → Data streams
+ // const CLIENT_ID_KEY  = "qr_redirect_client_id";
 
   // ---------------------------------------------------------
   // 📱 Store URLs
@@ -30,7 +30,7 @@
     const ua = navigator.userAgent || "";
     if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
     if (/Android/i.test(ua)) return "android";
-    //return "web";
+    return "web";
   }
 
   // ---------------------------------------------------------
@@ -60,16 +60,14 @@
           params: {
             device,
             source: "website_qr",
-            ts,
-            event_count:1
+            ts
           }
         },
         {
           name: `qr_scan_redirect_${device}`,
           params: {
             source: "website_qr",
-            ts,
-            event_count:1
+            ts
           }
         }
       ]
@@ -80,35 +78,24 @@
   // 🚀 Send event reliably (sendBeacon → fetch keepalive fallback)
   // ---------------------------------------------------------
   function sendEvents(payload) {
+    const url = `https://www.google-analytics.com/mp/collect?measurement_id=${encodeURIComponent(MEASUREMENT_ID)}&api_secret=${encodeURIComponent(API_SECRET)}`;
+    const body = JSON.stringify(payload);
 
-  const url = `https://www.google-analytics.com/mp/collect?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET)`;
+    // Prefer beacon for unload-safe delivery
+    if (navigator.sendBeacon) {
+      const ok = navigator.sendBeacon(url, body);
+      if (ok) return Promise.resolve(true);
+      // fall through to fetch if beacon fails
+    }
 
-  const body = JSON.stringify(payload);
- 
-  if (navigator.sendBeacon) {
-
-    const ok = navigator.sendBeacon(url, body);
-
-    if (ok) return Promise.resolve(true);
-
-    return Promise.resolve(false); // don’t also call fetch
-
+    // Fallback: fetch with keepalive to survive navigation
+    return fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      keepalive: true
+    }).then(() => true).catch(() => false);
   }
- 
-  return fetch(url, {
-
-    method: "POST",
-
-    headers: { "Content-Type": "application/json" },
-
-    body,
-
-    keepalive: true
-
-  });
-
-}
- 
 
   // ---------------------------------------------------------
   // 🔁 Track + redirect
@@ -125,9 +112,9 @@
     }
 
     // Short delay (optional) to keep UX smooth
-    const REDIRECT_DELAY_MS = 600;
+    const REDIRECT_DELAY_MS = 800;
     setTimeout(() => {
-      const target = STORE_URLS[device];
+      const target = STORE_URLS[device] || STORE_URLS.web;
       window.location.replace(target);
     }, REDIRECT_DELAY_MS);
   }
@@ -139,7 +126,3 @@
 </script>
 </body>
 </html>
-
-
-
-
