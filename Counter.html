@@ -80,24 +80,35 @@
   // 🚀 Send event reliably (sendBeacon → fetch keepalive fallback)
   // ---------------------------------------------------------
   function sendEvents(payload) {
-    const url = `https://www.google-analytics.com/mp/collect?measurement_id=${encodeURIComponent(MEASUREMENT_ID)}&api_secret=${encodeURIComponent(API_SECRET)}`;
-    const body = JSON.stringify(payload);
 
-    // Prefer beacon for unload-safe delivery
-    if (navigator.sendBeacon) {
-      const ok = navigator.sendBeacon(url, body);
-      if (ok) return Promise.resolve(true);
-      // fall through to fetch if beacon fails
-    }
+  const url = `https://www.google-analytics.com/mp/collect?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET)`;
 
-    // Fallback: fetch with keepalive to survive navigation
-    return fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-      keepalive: true
-    }).then(() => true).catch(() => false);
+  const body = JSON.stringify(payload);
+ 
+  if (navigator.sendBeacon) {
+
+    const ok = navigator.sendBeacon(url, body);
+
+    if (ok) return Promise.resolve(true);
+
+    return Promise.resolve(false); // don’t also call fetch
+
   }
+ 
+  return fetch(url, {
+
+    method: "POST",
+
+    headers: { "Content-Type": "application/json" },
+
+    body,
+
+    keepalive: true
+
+  });
+
+}
+ 
 
   // ---------------------------------------------------------
   // 🔁 Track + redirect
@@ -128,6 +139,7 @@
 </script>
 </body>
 </html>
+
 
 
 
