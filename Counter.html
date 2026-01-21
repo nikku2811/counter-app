@@ -116,7 +116,7 @@
     // Short delay (optional) to keep UX smooth
     const REDIRECT_DELAY_MS = 600;
     setTimeout(() => {
-      const target = STORE_URLS[device] || STORE_URLS.web;
+      const target = STORE_URLS[device];
       window.location.replace(target);
     }, REDIRECT_DELAY_MS);
   }
@@ -128,5 +128,6 @@
 </script>
 </body>
 </html>
+
 
 
